@@ -8,6 +8,7 @@ https://www.sphinx-doc.org/en/master/usage/configuration.html
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 import os
 import sys
+from typing import Optional
 
 import youcomsum as info
 
@@ -33,10 +34,11 @@ extensions = [
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "**tests**"]
 todo_include_todos = False
-html_favicon = "resources/favicon.png"
-if not os.path.exists(html_favicon):
+if os.path.exists("resources/favicon.png"):  # noqa: PTH110
+    html_favicon: Optional[str] = "resources/favicon.png"
+elif os.path.exists("resources/favicon.jpg"):  # noqa: PTH110
     html_favicon = "resources/favicon.jpg"
-if not os.path.exists(html_favicon):
+else:
     html_favicon = None
 # If no docstring, inherit from base class
 autodoc_inherit_docstrings = True

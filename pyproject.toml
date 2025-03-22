@@ -85,7 +85,7 @@ packages = [
 
 
 [tool.poetry.dependencies]
-python = ">=3.9"
+python = ">=3.9,<3.14"
 
 typing-extensions = ">=4.8.0"
 
@@ -102,12 +102,19 @@ sphinx-rtd-theme = { version = "3.0.2", optional = true }
 sphinxcontrib-mermaid = { version = "1.0.0", optional = true }
 poethepoet = { version = "0.32.2", optional = true }
 commitizen = { version = "4.1.1", optional = true }
+types-tqdm = { version = "4.67.0.20241221", optional = true }
+
+youtube-comment-downloader = "*"
+openai = "*"
+pycountry = "^24.6.1"
+transformers = "^4.50.0"
+torch = "^2.6.0"
 
 [tool.poetry.extras]
 test = ["pytest", "pytest-mock"]
 cov = ["pytest", "pytest-mock", "coverage", "pytest-cov"]
-lint = ["pytest", "pytest-mock", "mypy", "ruff"]
-format = ["pytest", "pytest-mock", "mypy", "ruff"]
+lint = ["pytest", "pytest-mock", "mypy", "ruff", "types-tqdm"]
+format = ["pytest", "pytest-mock", "mypy", "ruff", "types-tqdm"]
 docs = ["sphinx", "sphinx-rtd-theme", "sphinxcontrib-mermaid"]
 tasks = ["poethepoet", "pre-commit", "commitizen", "pre-commit-hooks"]
 
@@ -317,10 +324,9 @@ strict_equality = true
 # Config file
 warn_unused_configs = true
 
-# Exemple for missing types
-#[[tool.mypy.overrides]]
-#module = ["numpy.*"]
-#ignore_missing_imports = true
+[[tool.mypy.overrides]]
+module = ["youtube_comment_downloader.*"]
+ignore_missing_imports = true
 
 
 # ----------------------------------------------------------------------

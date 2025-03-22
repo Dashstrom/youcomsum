@@ -7,13 +7,13 @@ repos:
       entry: poetry run trailing-whitespace-fixer
       language: system
       types: [text]
-      stages: [commit, push, manual]
+      stages: [pre-commit, pre-push, manual]
     - id: end-of-file-fixer
       name: fix end of files
       entry: poetry run end-of-file-fixer
       language: system
       types: [text]
-      stages: [commit, push, manual]
+      stages: [pre-commit, pre-push, manual]
     - id: check-yaml
       name: check yaml
       entry: poetry run check-yaml

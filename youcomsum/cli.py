@@ -3,9 +3,10 @@
 import argparse
 import logging
 import sys
-from typing import NoReturn, Optional, Sequence
+from collections.abc import Sequence
+from typing import NoReturn, Optional
 
-from .core import hello
+from .core import summarize_youtube_comment
 from .info import __issues__, __summary__, __version__
 
 LOG_LEVELS = ["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"]
@@ -31,31 +32,21 @@ def get_parser() -> argparse.ArgumentParser:
         action="version",
         version=f"%(prog)s, version {__version__}",
     )
-
-    # Add subparsers
-    subparsers = parser.add_subparsers(
-        help="desired action to perform",
-        dest="action",
-        required=True,
-    )
-
-    # Add parent parser with common arguments
-    parent_parser = HelpArgumentParser(add_help=False)
-    parent_parser.add_argument(
+    # Verbose
+    parser.add_argument(
         "-v",
         "--verbose",
         help="verbose mode, enable INFO and DEBUG messages.",
         action="store_true",
         required=False,
     )
-
-    # Parser of hello command
-    hello_parser = subparsers.add_parser(
-        "hello",
-        parents=[parent_parser],
-        help="greet the user.",
+    parser.add_argument(
+        "-l",
+        "--lang",
+        help="language for output text.",
+        required=False,
     )
-    hello_parser.add_argument("--name", help="name to greeting")
+    parser.add_argument("url")
     return parser
 
 
@@ -63,9 +54,11 @@ def setup_logging(verbose: Optional[bool] = None) -> None:
     """Do setup logging."""
     # Setup logging
     logging.basicConfig(
-        level=logging.DEBUG if verbose else logging.WARNING,
+        level=logging.WARNING,
         format="[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s",
     )
+    if verbose:
+        logging.getLogger("youcomsum").setLevel(logging.DEBUG)
 
 
 def entrypoint(argv: Optional[Sequence[str]] = None) -> None:
@@ -74,10 +67,11 @@ def entrypoint(argv: Optional[Sequence[str]] = None) -> None:
         parser = get_parser()
         args = parser.parse_args(argv)
         setup_logging(args.verbose)
-        if args.action == "hello":
-            print(hello(args.name))  # noqa: T201
-        else:
-            parser.error("No command specified")
+        result = summarize_youtube_comment(
+            video=args.url,
+            lang=args.lang,
+        )
+        print(result)  # noqa: T201
     except Exception as err:  # NoQA: BLE001
         logger.critical("Unexpected error", exc_info=err)
         logger.critical("Please, report this error to %s.", __issues__)

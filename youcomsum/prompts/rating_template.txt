@@ -1,0 +1,9 @@
+## Rating
+
+By analyzing the comments, a rating of {RATING}/5 was given to the video. Here are the evaluation details:
+
+- Very Positive: {VERY_POSITIVE} comments
+- Positive: {POSITIVE} comments
+- Neutral: {NEUTRAL} comments
+- Negative: {NEGATIVE} comments
+- Very Negative: {VERY_NEGATIVE} comments

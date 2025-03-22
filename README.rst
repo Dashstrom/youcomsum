@@ -60,8 +60,9 @@ from `PyPI <https://pypi.org/project>`_
 Usage
 #####
 
-..  code-block:: bash
+..  code-block:: powershell
 
+  [Environment]::SetEnvironmentVariable("OPENAI_API_KEY", "your_api_key_here")
   youcomsum --version
   youcomsum --help
 
@@ -97,7 +98,7 @@ Poe is available for help you to run tasks.
 ..  code-block:: text
 
   test           Run test suite.
-  lint           Run linters: ruff checker and ruff formatter and mypy.        
+  lint           Run linters: ruff checker and ruff formatter and mypy.
   format         Run linters in fix mode.
   check          Run all checks: lint, test and docs.
   check-tag      Check if the current tag match the version.
