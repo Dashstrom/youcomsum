@@ -6,7 +6,7 @@ import sys
 from collections.abc import Sequence
 from typing import NoReturn, Optional
 
-from .core import summarize_youtube_comment
+from .core import YouCumSum
 from .info import __issues__, __summary__, __version__
 
 LOG_LEVELS = ["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"]
@@ -67,7 +67,8 @@ def entrypoint(argv: Optional[Sequence[str]] = None) -> None:
         parser = get_parser()
         args = parser.parse_args(argv)
         setup_logging(args.verbose)
-        result = summarize_youtube_comment(
+        youcomsum = YouCumSum()
+        result = youcomsum.summarize(
             video=args.url,
             lang=args.lang,
         )

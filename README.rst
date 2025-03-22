@@ -60,7 +60,16 @@ Before use :bash:`youcomsum`, you must set your :bash:`OPENAI_API_KEY` following
 ..  code-block:: bash
 
   youcomsum -v 'http://youtu.be/dQw4w9WgXcQ'
-  youcomsum -v 'http://youtu.be/dQw4w9WgXcQ' > summarize.md
+
+Usage as module
+###############
+
+..  code-block:: python
+
+  from youcomsum import YouComSum
+
+  youcomsum = YouComSum()
+  youcomsum.summarize("http://youtu.be/dQw4w9WgXcQ")
 
 Development
 ###########
