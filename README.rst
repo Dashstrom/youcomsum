@@ -69,7 +69,8 @@ Usage as module
   from youcomsum import YouComSum
 
   youcomsum = YouComSum()
-  youcomsum.summarize("http://youtu.be/dQw4w9WgXcQ")
+  text: str = youcomsum.summarize("http://youtu.be/dQw4w9WgXcQ")
+  print(text)
 
 Development
 ###########
