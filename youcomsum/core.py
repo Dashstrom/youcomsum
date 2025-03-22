@@ -9,12 +9,7 @@ from typing import Any, Optional
 from urllib.parse import parse_qs, urlparse
 
 import pycountry
-from openai import OpenAI
 from tqdm.auto import tqdm  # type: ignore[import-untyped]
-from transformers import pipeline  # type: ignore[import-untyped]
-from youtube_comment_downloader import (
-    YoutubeCommentDownloader,
-)
 
 RE_USER = re.compile(r"\xa0@[\w\d_\-]+\xa0")
 logger = logging.getLogger(__name__)
@@ -27,7 +22,7 @@ RE_VIDEO_ID = re.compile(r"[0-9a-zA-Z\-_]{3,}")
 SEP = "\n#######################################\n"
 RE_HEADER = re.compile(r"(^|\n)(#+) ")
 DEFAULT_MODEL = "gpt-4o-mini"
-DEFAULT_CONTEXT_SIZE = 16000
+DEFAULT_CONTEXT_SIZE = 25000
 TAGS = {
     "Very Negative": 0,
     "Negative": 0.25,
@@ -57,11 +52,11 @@ def get_default_lang() -> Any:
     return "en"
 
 
-def fix_markdown(text: str, indent: int = 0) -> str:
+def fix_markdown(text: str, header: int = 1) -> str:
     """Fix markdown."""
     min_header_level = (
-        min((len(header) for header in RE_HEADER.findall(text)), default=0)
-        - indent
+        min((len(match[2]) for match in RE_HEADER.finditer(text)), default=0)
+        - header
     )
 
     def _replace_header(match: "re.Match[str]") -> str:
@@ -98,6 +93,11 @@ def get_video_id(text: str) -> str:
 class YouComSum:
     def __init__(self) -> None:
         """Init."""
+        logger.info("Loading modules and models...")
+        from openai import OpenAI
+        from transformers import pipeline  # type: ignore[import-untyped]
+        from youtube_comment_downloader import YoutubeCommentDownloader
+
         self.downloader = YoutubeCommentDownloader()
         self.client = OpenAI()
         self.pipe = pipeline(
@@ -107,6 +107,7 @@ class YouComSum:
             truncation_strategy="only_first",
             truncation=True,
         )
+        logger.info("Loading done !")
 
     def summarize(
         self,
@@ -174,7 +175,11 @@ class YouComSum:
                 raise ValueError(err)
             answers.append(completion.choices[0].message.content)
 
-        logger.info("Generate final summary ...")
+        final_prompt = SEP.join(answers)
+        logger.info(
+            "Generate final summary (~%s tokens) ...",
+            len(final_prompt.split()),
+        )
         completion = self.client.chat.completions.create(
             model=model,
             messages=[
@@ -184,7 +189,7 @@ class YouComSum:
                         "{LANGUAGE}", language.name
                     ),
                 },
-                {"role": "user", "content": SEP.join(answers)},
+                {"role": "user", "content": final_prompt},
             ],
         )
         result = completion.choices[0].message.content
@@ -237,5 +242,7 @@ class YouComSum:
 
         # Fix different header level
         return (
-            fix_markdown(result) + "\n\n" + fix_markdown(rating_text, indent=1)
+            fix_markdown(result, header=1)
+            + "\n\n"
+            + fix_markdown(rating_text, header=2)
         )
