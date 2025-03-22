@@ -162,7 +162,7 @@ help = "Check if the current tag match the version."
 expr = """
 sys.exit(
     subprocess.run(
-        ['git', 'describe', 'tag', '--abbrev=0'],
+        ['git', 'describe', '--exact-match', '--tags'],
         text=True,
         stderr=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
