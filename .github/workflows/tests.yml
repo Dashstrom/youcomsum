@@ -10,13 +10,13 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-12
+          - os: macos-latest
             python-version: "3.9"
-          - os: windows-2022
+          - os: windows-latest
             python-version: "3.9"
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             python-version: "3.9"
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             python-version: "3.12"
     defaults:
       run:
