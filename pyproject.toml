@@ -166,7 +166,7 @@ sys.exit(
         text=True,
         stderr=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
-    ).stdout
+    ).stdout.strip()
     != 'v' + youcomsum.__version__
   )
 """
