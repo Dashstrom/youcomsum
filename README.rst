@@ -5,7 +5,7 @@
 youcomsum
 *********
 
-|ci-docs| |ci-lint| |ci-tests| |pypi| |versions| |discord| |license|
+|ci-docs| |ci-lint| |ci-tests| |pypi| |versions| |license|
 
 .. |ci-docs| image:: https://github.com/Dashstrom/youcomsum/actions/workflows/docs.yml/badge.svg
   :target: https://github.com/Dashstrom/youcomsum/actions/workflows/docs.yml
@@ -27,10 +27,6 @@ youcomsum
   :target: https://pypi.org/project/youcomsum
   :alt: Python : versions
 
-.. |discord| image:: https://img.shields.io/badge/Discord-youcomsum-5865F2?style=flat&logo=discord&logoColor=white
-  :target: n
-  :alt: Discord
-
 .. |license| image:: https://img.shields.io/badge/license-MIT-green.svg
   :target: https://github.com/Dashstrom/youcomsum/blob/main/LICENSE
   :alt: License : MIT
@@ -48,23 +44,23 @@ Documentation is available on https://dashstrom.github.io/youcomsum
 Installation
 ############
 
-You can install :bash:`youcomsum` using `pipx <https://pipx.pypa.io/stable/>`_
+You can install :bash:`youcomsum` using `uv <https://docs.astral.sh/uv/getting-started/installation/>`_
 from `PyPI <https://pypi.org/project>`_
 
 ..  code-block:: bash
 
-  pip install pipx
-  pipx ensurepath
-  pipx install youcomsum
+  pip install uv
+  uv tool install youcomsum
 
 Usage
 #####
 
-..  code-block:: powershell
+Before use :bash:`youcomsum`, you must set your :bash:`OPENAI_API_KEY` following the `Best Practices for API Key Safety <https://help.openai.com/en/articles/5112595-best-practices-for-api-key-safety>`_.
 
-  [Environment]::SetEnvironmentVariable("OPENAI_API_KEY", "your_api_key_here")
-  youcomsum --version
-  youcomsum --help
+..  code-block:: bash
+
+  youcomsum -v 'http://youtu.be/dQw4w9WgXcQ'
+  youcomsum -v 'http://youtu.be/dQw4w9WgXcQ' > summarize.md
 
 Development
 ###########

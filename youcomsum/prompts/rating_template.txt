@@ -1,4 +1,4 @@
-## Rating
+# Rating
 
 By analyzing the comments, a rating of {RATING}/5 was given to the video. Here are the evaluation details:
 

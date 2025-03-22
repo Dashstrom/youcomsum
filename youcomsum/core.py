@@ -43,10 +43,10 @@ def get_video_id(text: str) -> str:
     """Get the ID of a video and validate it.
 
     Examples:
-    - http://youtu.be/tVGH-g6OQhg
-    - http://www.youtube.com/watch?v=tVGH-g6OQhg&feature=feed
-    - http://www.youtube.com/embed/tVGH-g6OQhg
-    - http://www.youtube.com/v/tVGH-g6OQhg?version=3&amp;hl=en_US
+    - http://youtu.be/dQw4w9WgXcQ
+    - https://www.youtube.com/watch?v=dQw4w9WgXcQ&feature=feed
+    - http://www.youtube.com/embed/dQw4w9WgXcQ
+    - http://www.youtube.com/v/dQw4w9WgXcQ?version=3&amp;hl=en_US
     """
     url_data = urlparse(text)
     if url_data.hostname == "youtu.be":
@@ -100,29 +100,23 @@ def fix_markdown(text: str, indent: int = 0) -> str:
 _PIPE: Optional[Pipeline] = None
 
 
-def summarize_youtube_comment(
+def summarize_youtube_comment(  # noqa: PLR0915
     video: str,
     lang: Optional[str] = None,
     model: str = DEFAULT_MODEL,
     context_size: int = DEFAULT_CONTEXT_SIZE,
 ) -> str:
     """Generate report for a youtube video."""
-    global _PIPE  # noqa: PLW0603
-    if _PIPE is None:
-        _PIPE = pipeline(
-            "text-classification",
-            model="tabularisai/multilingual-sentiment-analysis",
-            max_length=512,
-            truncation_strategy="only_first",
-            truncation=True,
-        )
+    # REsolve the id of the video
+    video_id = get_video_id(video)
+    logger.info("Summarize %s", video_id)
 
+    # Detect the system language
     if lang is None:
         lang = get_default_lang()
     language = pycountry.languages.get(alpha_2=lang)
+    logger.info("The summary will be in %r", language.name)
 
-    video_id = get_video_id(video)
-    logger.info("Summarize %s", video_id)
     logger.info("Fetching the video comments ...")
     text_size = -len(SEP)
     morsels = []
@@ -130,7 +124,9 @@ def summarize_youtube_comment(
     comments = []
     counter = {tag: 0 for tag in TAGS}
     for comment in tqdm(
-        _downloader.get_comments(video_id), desc="Download comments"
+        _downloader.get_comments(video_id),
+        desc="Download comments",
+        disable=not logger.isEnabledFor(logging.INFO),
     ):
         text: str = comment["text"].replace("\r\n", "\n")
         text = RE_USER.sub("@USER", text)
@@ -144,16 +140,14 @@ def summarize_youtube_comment(
             text_size = len(morsels[0])
     batches.append(SEP.join(morsels))
 
-    results = _PIPE(comments)
-    counter = Counter(result["label"] for result in results)
-    rating = 0.0
-    for value, count in counter.items():
-        rating += TAGS[value] * count
-    rating /= len(comments)
-
+    # Process comments as batch
     logger.info("Sizes of batches: %s", [len(batch) for batch in batches])
     answers: list[str] = []
-    for batch in tqdm(batches, desc="Process batches"):
+    for batch in tqdm(
+        batches,
+        desc="Process batches",
+        disable=not logger.isEnabledFor(logging.INFO),
+    ):
         completion = _client.chat.completions.create(
             model=model,
             messages=[
@@ -171,7 +165,7 @@ def summarize_youtube_comment(
             raise ValueError(err)
         answers.append(completion.choices[0].message.content)
 
-    logger.info("Generate final answer ...")
+    logger.info("Generate final summary ...")
     completion = _client.chat.completions.create(
         model=model,
         messages=[
@@ -189,6 +183,29 @@ def summarize_youtube_comment(
         err = "No message content generated"
         raise ValueError(err)
 
+    # Lazy load the sentiment analysis model
+    logger.info("Loading sentiment analysis model")
+    global _PIPE  # noqa: PLW0603
+    if _PIPE is None:
+        _PIPE = pipeline(
+            "text-classification",
+            model="tabularisai/multilingual-sentiment-analysis",
+            max_length=512,
+            truncation_strategy="only_first",
+            truncation=True,
+        )
+
+    # Use sentiment analysis model
+    results = _PIPE(comments)
+
+    # Normalize result and generate rating
+    counter = Counter(result["label"] for result in results)
+    rating = 0.0
+    for value, count in counter.items():
+        rating += TAGS[value] * count
+    rating /= len(comments)
+
+    # Generate the final rating answer with rating
     logger.info("Generate rating answer ...")
     completion = _client.chat.completions.create(
         model=model,
@@ -214,10 +231,10 @@ def summarize_youtube_comment(
             },
         ],
     )
-
     rating_text = completion.choices[0].message.content
     if rating_text is None:
         err = "No message content generated"
         raise ValueError(err)
 
-    return fix_markdown(result) + "\n\n" + fix_markdown(rating_text)
+    # Fix different header level
+    return fix_markdown(result) + "\n\n" + fix_markdown(rating_text, indent=1)
