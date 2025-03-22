@@ -1,7 +1,7 @@
 """Main module."""
 
 from .cli import entrypoint
-from .core import YouCumSum
+from .core import YouComSum
 from .info import (
     __author__,
     __email__,
@@ -12,7 +12,7 @@ from .info import (
 )
 
 __all__ = [
-    "YouCumSum",
+    "YouComSum",
     "__author__",
     "__email__",
     "__license__",

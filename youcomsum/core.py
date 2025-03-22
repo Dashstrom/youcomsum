@@ -95,7 +95,7 @@ def get_video_id(text: str) -> str:
     return text
 
 
-class YouCumSum:
+class YouComSum:
     def __init__(self) -> None:
         """Init."""
         self.downloader = YoutubeCommentDownloader()
